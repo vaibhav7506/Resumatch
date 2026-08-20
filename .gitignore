@@ -1,0 +1,33 @@
+.env
+.env.local
+.env.*.local
+venv/
+env/
+__pycache__/
+*.pyc
+*.egg-info/
+.DS_Store
+
+# don't commit uploaded/sample resumes — they may contain real PII
+*.pdf
+!sample_data/anonymized_example.pdf
+
+# frontend
+node_modules/
+dist/
+build/
+.vite/
+*.local
+
+# editor / OS
+.vscode/
+.idea/
+Thumbs.db
+
+# logs
+*.log
+npm-debug.log*
+
+# db / misc
+*.sqlite3
+.pytest_cache/

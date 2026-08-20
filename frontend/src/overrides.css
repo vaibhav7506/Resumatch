@@ -1,0 +1,105 @@
+.jd-toggle { display: flex; justify-content: space-between; width: 100%; border: 0; border-top: 1px solid #D8D4C8; padding: 13px 0 10px; background: transparent; color: #1B2430; text-align: left; font-size: 13px; font-weight: 600; }
+.jd-toggle span { color: #5B6F55; font: 11px 'IBM Plex Mono', monospace; }
+
+.review-layout { grid-template-columns: minmax(0, 3fr) minmax(340px, 2fr); }
+
+.resume-paper,
+.resume-paper .resume-section,
+.resume-paper .resume-section p,
+.resume-paper .resume-section h2 {
+  font-family: Inter, 'IBM Plex Sans', sans-serif;
+}
+
+.resume-paper .document-topline,
+.resume-paper .document-topline span {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+
+.resume-paper .resume-section h2 {
+  margin: 0 0 8px;
+  color: #5B6F55;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.05em;
+}
+
+.resume-paper .resume-section p {
+  max-width: none;
+  margin: 0;
+  font-family: Inter, 'IBM Plex Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.6;
+  white-space: normal;
+}
+
+.review-layout > .margin-panel {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+}
+
+.margin-panel {
+  padding: 48px 36px 52px;
+}
+
+.margin-panel .margin-label {
+  margin: 0 0 22px;
+}
+
+.score-stamp {
+  padding-bottom: 24px;
+}
+
+.score-stamp strong {
+  margin-bottom: 22px;
+}
+
+.score-stamp span {
+  margin-top: 0;
+}
+
+.score-breakdown {
+  padding: 24px 0 0;
+  margin-bottom: 44px;
+}
+
+.notes { width: 100%; min-width: 0; max-width: none; padding-top: 0; }
+.margin-note {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0 0 32px 28px;
+}
+
+.margin-note + .margin-note {
+  padding-top: 32px;
+  border-top: 1px solid #D8D4C8;
+}
+
+.margin-note > div { display: block; width: 100%; min-width: 0; max-width: none; }
+.margin-note small { display: block; margin-bottom: 8px; }
+.margin-note p {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  margin: 0;
+  font-family: Inter, 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+@media (max-width: 767px) {
+  .margin-panel { min-width: 0; padding: 38px 28px 42px; }
+  .score-breakdown { margin-bottom: 40px; }
+}
