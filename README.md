@@ -144,6 +144,24 @@ Set `GROQ_API_KEY` in `.env`. The default `LLM_MODEL` is `llama-3.3-70b-versatil
 
 Open `/docs` for the interactive Swagger UI, or hit the endpoint directly (see below).
 
+## Deploy on Render
+
+This repository includes [`render.yaml`](render.yaml), which deploys the
+existing stack without changing its technology choices:
+
+- `resumatch-api`: FastAPI + LangGraph web service, packaged with the existing
+  OCR dependencies.
+- `resumatch-web`: Vite/React static site.
+- `resumatch-db`: Render Postgres, used with the existing pgvector schema.
+
+In Render, select **New → Blueprint** and choose this repository. During the
+initial setup, provide `GROQ_API_KEY` and `VOYAGE_API_KEY` when prompted. The
+Blueprint wires `DATABASE_URL`, the frontend `VITE_API_URL`, and the backend
+`CORS_ORIGINS` automatically. The API health check is `/health`.
+
+The API container runs `python -m app.db.init_db` before Uvicorn starts, so it
+enables pgvector and creates missing tables on the Render Postgres instance.
+
 ## API usage
 
 ```bash

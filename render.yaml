@@ -1,0 +1,47 @@
+services:
+  - type: web
+    name: resumatch-api
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: resumatch-db
+          property: connectionString
+      - key: GROQ_API_KEY
+        sync: false
+      - key: VOYAGE_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        value: llama-3.3-70b-versatile
+      - key: EMBEDDING_MODEL
+        value: voyage-3
+      - key: LOG_LEVEL
+        value: INFO
+      - key: CORS_ORIGINS
+        fromService:
+          type: web
+          name: resumatch-web
+          envVarKey: RENDER_EXTERNAL_URL
+
+  - type: web
+    name: resumatch-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: resumatch-api
+          envVarKey: RENDER_EXTERNAL_URL
+
+databases:
+  - name: resumatch-db
+    databaseName: resumatch
+    user: resumatch
+    plan: free
+    postgresMajorVersion: "16"
+    ipAllowList: []
