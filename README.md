@@ -93,7 +93,7 @@ FastAPI endpoint (async, SSE streaming)
 |---|---|
 | API | FastAPI (async, SSE streaming) |
 | Orchestration | LangGraph |
-| LLM | Groq (`llama-3.3-70b-versatile`) |
+| LLM | Groq (`openai/gpt-oss-20b`) |
 | Embeddings | Voyage AI |
 | Vector store | PostgreSQL + pgvector |
 | PDF parsing | pdfplumber → pdf2image + Tesseract OCR fallback |
@@ -140,7 +140,7 @@ python -m uvicorn app.main:app --reload
 ```
 </details>
 
-Set `GROQ_API_KEY` in `.env`. The default `LLM_MODEL` is `llama-3.3-70b-versatile`. Groq handles all language-model requests; Voyage AI continues to provide the embeddings used by pgvector.
+Set `GROQ_API_KEY` in `.env`. The default `LLM_MODEL` is `openai/gpt-oss-20b`. Groq handles all language-model requests; Voyage AI continues to provide the embeddings used by pgvector for resume analysis.
 
 Open `/docs` for the interactive Swagger UI, or hit the endpoint directly (see below).
 

@@ -64,6 +64,9 @@ class StudyQuizTests(unittest.TestCase):
     def start(self, count=2):
         response = self.client.post("/quiz/start", json={"material_document_id": "material", "question_count": count})
         self.assertEqual(response.status_code, 200, response.text)
+        generated = json.loads(self.llm.return_value)
+        generated["question"] = "Which formula calculates force for the next example?"
+        self.llm.return_value = json.dumps(generated)
         return response.json()
 
     def answer_body(self, started, answer="Mass times acceleration"):
@@ -109,6 +112,15 @@ class StudyQuizTests(unittest.TestCase):
         response = self.client.post("/ingest-study-material", files={"file": ("bad.pdf", b"not a PDF", "application/pdf")})
         self.assertEqual(response.status_code, 422)
         self.assertIn("Couldn't read", response.json()["detail"])
+
+    def test_repeated_question_is_regenerated(self):
+        started = self.start()
+        repeated = json.loads(self.llm.return_value)
+        repeated["question"] = started["question"]["question"]
+        self.llm.side_effect = [json.dumps(repeated), self.llm.return_value]
+        response = self.client.post("/quiz/answer", json=self.answer_body(started))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotEqual(response.json()["next_question"]["question"], started["question"]["question"])
 
 
 if __name__ == "__main__":
