@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     groq_api_key: str
-    llm_model: str = "llama-3.3-70b-versatile"
+    llm_model: str = "openai/gpt-oss-20b"
 
     voyage_api_key: str
     embedding_model: str = "voyage-3"

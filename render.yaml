@@ -14,7 +14,7 @@ services:
       - key: VOYAGE_API_KEY
         sync: false
       - key: LLM_MODEL
-        value: llama-3.3-70b-versatile
+        value: openai/gpt-oss-20b
       - key: EMBEDDING_MODEL
         value: voyage-3
       - key: LOG_LEVEL
