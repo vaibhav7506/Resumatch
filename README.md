@@ -10,7 +10,7 @@
 
 **Turn a resume and a job description into a structured, explainable match score — through a multi-step LangGraph pipeline instead of one flat prompt to an LLM.**
 
-🔗 **Live demo:** [resumatchvaibhav7506.up.railway.app](https://resumatchvaibhav7506.up.railway.app/)
+🔗 **Live demo:** [resumatch-web.onrender.com](https://resumatch-web.onrender.com/)
 📚 **Interactive API docs:** append `/docs` to the URL above for the Swagger UI
 🧱 **v1 (predecessor):** [ResumeAnalyzer](https://github.com/vaibhav7506/ResumeAnalyzer)
 
@@ -97,7 +97,7 @@ FastAPI endpoint (async, SSE streaming)
 | Embeddings | Voyage AI |
 | Vector store | PostgreSQL + pgvector |
 | PDF parsing | pdfplumber → pdf2image + Tesseract OCR fallback |
-| Deployment | Docker, Railway |
+| Deployment | Docker, Render |
 
 ## Getting started
 
