@@ -15,7 +15,7 @@ def study_pdf():
         "A body at rest stays at rest unless acted on by a net external force.",
         "Action and reaction forces are equal in magnitude and opposite in direction.",
     ]
-    stream = "BT /F1 10 Tf 40 740 Td "
+    stream = "BT /F1 10 Tf 40 550 Td "
     for index, line in enumerate(lines):
         escaped = line.replace("\\", "\\\\").replace("(", "\\(").replace(")", "\\)")
         stream += ("0 -30 Td " if index else "") + f"({escaped}) Tj "
