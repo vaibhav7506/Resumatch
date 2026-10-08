@@ -29,12 +29,13 @@ _STOPWORDS = {
     "such", "into", "your", "will", "able", "strong", "good", "years",
     "skills", "knowledge", "ability", "including", "various", "some",
 } 
-def complete(system: str, user: str, max_tokens: int) -> str:
+def complete(system: str, user: str, max_tokens: int, *, json_mode: bool = False) -> str:
     """Run a plain-text Groq chat completion and return its text safely."""
     response = llm.chat.completions.create(
         model=settings.llm_model,
         max_completion_tokens=max_tokens,
         reasoning_effort="low",
+        response_format={"type": "json_object"} if json_mode else {"type": "text"},
         messages=[
             {"role": "system", "content": system},
             {"role": "user", "content": user},

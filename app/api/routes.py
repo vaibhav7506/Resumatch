@@ -209,6 +209,7 @@ def _generate_quiz_question(material_text: str, difficulty: str, prior_topics: l
             ),
             user=f"Difficulty: {difficulty}\n\nStudy material:\n{excerpt}",
             max_tokens=2000,
+            json_mode=True,
         )
         question = _json_object(raw)
         choices = [str(choice).strip() for choice in question.get("choices", []) if str(choice).strip()]
