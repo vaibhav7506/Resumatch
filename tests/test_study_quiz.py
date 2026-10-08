@@ -130,6 +130,18 @@ class StudyQuizTests(unittest.TestCase):
         self.start()
         self.assertEqual(self.validator.call_count, 2)
 
+    def test_answer_key_repair_is_independently_rechecked(self):
+        self.validator_patch.stop()
+        question = {"question": "What is 2 times 3?", "choices": ["4", "5"], "answer": "4", "explanation": "Incorrect explanation"}
+        self.llm.side_effect = [
+            json.dumps({"valid": False, "grounded": True, "correct_answer": "6", "explanation": "2 times 3 is 6."}),
+            json.dumps({"valid": True}),
+        ]
+        routes._validate_quiz_question(question, "Force equals mass times acceleration. For mass 2 and acceleration 3, force is 6.")
+        self.assertEqual(question["answer"], "6")
+        self.assertIn("6", question["choices"])
+        self.assertEqual(self.llm.call_count, 2)
+
 
 if __name__ == "__main__":
     unittest.main()
