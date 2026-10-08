@@ -41,7 +41,7 @@ function UploadZone({ file, onSelect, disabled, label }) {
   const input = useRef(null)
   const [dragging, setDragging] = useState(false)
   return <><input ref={input} className="sr-only" type="file" accept="application/pdf,.pdf" onChange={(event) => onSelect(event.target.files?.[0])} />
-    <button className={`upload-zone ${dragging ? 'is-dragging' : ''} ${file ? 'has-file' : ''}`} type="button" disabled={disabled} onClick={() => input.current?.click()} onDragOver={(event) => { event.preventDefault(); setDragging(true) }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); onSelect(event.dataTransfer.files?.[0]) }}>
+    <button className={`upload-zone ${dragging ? 'is-dragging' : ''} ${file ? 'has-file' : ''}`} type="button" disabled={disabled} onClick={() => input.current?.click()} onDragOver={(event) => { event.preventDefault(); setDragging(true) }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); if (disabled) return; onSelect(event.dataTransfer.files?.[0]) }}>
       {file ? <><span className="file-tag">PDF</span><span><strong>{file.name}</strong><small>{(file.size / 1024 / 1024).toFixed(1)} MB selected</small></span><span className="change-file">Change</span></> : <><span className="upload-glyph">+</span><span><strong>{label}</strong><small>or browse your files</small></span></>}
     </button></>
 }
@@ -68,7 +68,7 @@ function MarginPanel({ result, status }) {
 
 function QuizPanel({ quiz, status, onAnswer, onContinue }) {
   const [selected, setSelected] = useState('')
-  useEffect(() => setSelected(''), [quiz?.question?.question])
+  useEffect(() => setSelected(''), [quiz?.question?.question_id])
   if (status === 'study-reading' || status === 'study-writing') return <aside className="margin-panel loading-panel"><p className="margin-label">Adaptive quiz</p><p>{status === 'study-reading' ? 'Reading your study material…' : 'Writing the next question…'}</p></aside>
   if (!quiz) return <aside className="margin-panel intro-notes"><p className="margin-label">Adaptive quiz</p><p>Upload a study guide or question book to begin a five-question check of understanding.</p></aside>
   if (quiz.complete) return <aside className="margin-panel quiz-panel"><p className="margin-label">Quiz complete</p><div className="score-stamp olive"><strong>{quiz.correctCount}/{quiz.target}</strong><span>answers correct</span></div><p className="quiz-copy">Use another chapter or restart the quiz to practise a different set of questions.</p></aside>
@@ -97,13 +97,68 @@ export default function App() {
   async function startQuiz() {
     if (!studyFile) { setError('Choose a PDF study material file to continue.'); return }
     setError(''); setQuiz(null); setStatus('study-reading')
-    try { await withTimeout(async (signal) => { const ingest = await uploadPdf('/ingest-study-material', studyFile, signal); setStudyText(ingest.material_text); setStatus('study-writing'); const started = await postJson('/quiz/start', { material_document_id: ingest.document_id, material_text: ingest.material_text, question_count: 5 }, signal); setQuiz({ sessionId: started.session_id, question: started.question, target: started.target_questions, answeredCount: 0, correctCount: 0, feedback: null, nextQuestion: null, complete: false }); setStatus('done') }) } catch (caught) { showError(caught, 'quiz') }
+    try { await withTimeout(async (signal) => { const ingest = await uploadPdf('/ingest-study-material', studyFile, signal); setStudyText(ingest.material_text); setStatus('study-writing'); const started = await postJson('/quiz/start', { material_document_id: ingest.document_id, question_count: 5 }, signal); setQuiz({ sessionId: started.session_id, question: started.question, target: started.target_questions, answeredCount: 0, correctCount: 0, feedback: null, nextQuestion: null, complete: false }); setStatus('done') }) } catch (caught) { showError(caught, 'quiz') }
   }
   async function answerQuiz(answer) {
     setError(''); setStatus('study-writing')
-    try { await withTimeout(async (signal) => { const response = await postJson('/quiz/answer', { session_id: quiz.sessionId, answer }, signal); setQuiz((current) => ({ ...current, answeredCount: response.answered_count, correctCount: response.correct_count, target: response.target_questions, feedback: response, nextQuestion: response.next_question })); setStatus('done') }) } catch (caught) { showError(caught, 'quiz answer') }
+    try { await withTimeout(async (signal) => { const response = await postJson('/quiz/answer', { session_id: quiz.sessionId, question_id: quiz.question.question_id, answer }, signal); setQuiz((current) => ({ ...current, answeredCount: response.answered_count, correctCount: response.correct_count, target: response.target_questions, feedback: response, nextQuestion: response.next_question })); setStatus('done') }) } catch (caught) { showError(caught, 'quiz answer') }
   }
   const continueQuiz = () => setQuiz((current) => current.nextQuestion ? { ...current, question: current.nextQuestion, feedback: null, nextQuestion: null } : { ...current, complete: true, feedback: null })
   const hasOutput = isStudy ? Boolean(quiz) : Boolean(result)
-  return <main><header><a className="brand" href="#top">RESUMATCH</a>{hasOutput && <button className="reset-link" onClick={reset}>{isStudy ? 'Start another quiz' : 'Analyze another resume'}</button>}</header><div className="app-shell" id="top"><div className="mode-switch" role="tablist" aria-label="ResuMatch mode"><button className={!isStudy ? 'active' : ''} onClick={() => { reset(); setMode('resume') }}>Resume review</button><button className={isStudy ? 'active' : ''} onClick={() => { reset(); setMode('study') }}>Study test</button></div><div className={`review-layout ${hasOutput ? 'has-results' : ''}`}>{isStudy ? <><section className="document-column">{studyText ? <DocumentPaper text={studyText} file={studyFile} type="Study material" /> : <article className="resume-paper intake-paper"><p className="paper-kicker">Study material under review</p><h1>Test what you have read.</h1><p className="paper-intro">Upload a study guide or question book. The tutor will ask one question at a time and adapt after each answer.</p><UploadZone file={studyFile} onSelect={(file) => selectFile(file, setStudyFile, 'study material')} disabled={busy} label="Drop study material PDF here" />{error && <p className="editorial-error" role="alert">{error}</p>}<button className="analyze-button" type="button" disabled={busy} onClick={startQuiz}>{busy ? (status === 'study-reading' ? 'Reading your study material…' : 'Writing question…') : 'Start study test'}</button></article>}</section><QuizPanel quiz={quiz} status={status} onAnswer={answerQuiz} onContinue={continueQuiz} /></> : <><section className="document-column">{resumeText ? <DocumentPaper text={resumeText} file={resumeFile} type="Resume" /> : <article className="resume-paper intake-paper"><p className="paper-kicker">Document under review</p><h1>Start with the resume.</h1><p className="paper-intro">The review will mark what supports the role and where the evidence is thin.</p><UploadZone file={resumeFile} onSelect={(file) => selectFile(file, setResumeFile, 'resume')} disabled={busy} label="Drop a resume PDF here" /><div className="jd-field"><button type="button" className="jd-toggle" onClick={() => setJdOpen(!jdOpen)}>Job description <span>Optional {jdOpen ? '−' : '+'}</span></button>{jdOpen && <textarea id="jd" value={jobDescription} onChange={(event) => setJobDescription(event.target.value)} placeholder="Optional — paste the job description for a role-specific review." rows="6" disabled={busy} />}</div>{error && <p className="editorial-error" role="alert">{error}</p>}<button className="analyze-button" type="button" disabled={busy} onClick={analyzeResume}>{busy ? (status === 'resume-reading' ? 'Reading your resume…' : 'Comparing against the role…') : 'Analyze document'}</button></article>}</section><MarginPanel result={result} status={status} /></>}</div></div></main>
+  return (
+    <main>
+      <header>
+        <a className="brand" href="#top">RESUMATCH</a>
+        {(hasOutput || resumeText || studyText) && <button className="reset-link" disabled={busy} onClick={reset}>
+          {isStudy ? 'Start another quiz' : 'Analyze another resume'}
+        </button>}
+      </header>
+      <div className="app-shell" id="top">
+        <nav className="mode-switch" aria-label="ResuMatch mode">
+          <button disabled={busy} aria-pressed={!isStudy} className={!isStudy ? 'active' : ''} onClick={() => { reset(); setMode('resume') }}>Resume review</button>
+          <button disabled={busy} aria-pressed={isStudy} className={isStudy ? 'active' : ''} onClick={() => { reset(); setMode('study') }}>Study test</button>
+        </nav>
+        {error && <div className="request-error">
+          <p className="editorial-error" role="alert">{error}</p>
+          {((isStudy && studyText && !quiz) || (!isStudy && resumeText && !result)) &&
+            <button className="reset-link" disabled={busy} onClick={isStudy ? startQuiz : analyzeResume}>Try again</button>}
+        </div>}
+        <div className={`review-layout ${hasOutput ? 'has-results' : ''}`}>
+          {isStudy ? <>
+            <section className="document-column">
+              {studyText ? <DocumentPaper text={studyText} file={studyFile} type="Study material" /> :
+                <article className="resume-paper intake-paper">
+                  <p className="paper-kicker">Study material under review</p>
+                  <h1>Test what you have read.</h1>
+                  <p className="paper-intro">Upload a study guide or question book. The tutor will ask five questions, one at a time, and adapt after each answer.</p>
+                  <UploadZone file={studyFile} onSelect={(file) => selectFile(file, setStudyFile, 'study material')} disabled={busy} label="Drop study material PDF here" />
+                  <button className="analyze-button" type="button" disabled={busy} onClick={startQuiz}>
+                    {busy ? (status === 'study-reading' ? 'Reading your study material…' : 'Writing question…') : 'Start study test'}
+                  </button>
+                </article>}
+            </section>
+            <QuizPanel quiz={quiz} status={status} onAnswer={answerQuiz} onContinue={continueQuiz} />
+          </> : <>
+            <section className="document-column">
+              {resumeText ? <DocumentPaper text={resumeText} file={resumeFile} type="Resume" /> :
+                <article className="resume-paper intake-paper">
+                  <p className="paper-kicker">Document under review</p>
+                  <h1>Start with the resume.</h1>
+                  <p className="paper-intro">The review will mark what supports the role and where the evidence is thin.</p>
+                  <UploadZone file={resumeFile} onSelect={(file) => selectFile(file, setResumeFile, 'resume')} disabled={busy} label="Drop a resume PDF here" />
+                  <div className="jd-field">
+                    <button type="button" className="jd-toggle" onClick={() => setJdOpen(!jdOpen)}>Job description <span>Optional {jdOpen ? '−' : '+'}</span></button>
+                    {jdOpen && <textarea id="jd" value={jobDescription} onChange={(event) => setJobDescription(event.target.value)} placeholder="Optional — paste the job description for a role-specific review." rows="6" disabled={busy} />}
+                  </div>
+                  <button className="analyze-button" type="button" disabled={busy} onClick={analyzeResume}>
+                    {busy ? (status === 'resume-reading' ? 'Reading your resume…' : 'Comparing against the role…') : 'Analyze document'}
+                  </button>
+                </article>}
+            </section>
+            <MarginPanel result={result} status={status} />
+          </>}
+        </div>
+      </div>
+    </main>
+  )
 }

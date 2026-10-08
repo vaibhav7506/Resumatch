@@ -123,6 +123,8 @@
 }
 
 .mode-switch button.active { border-color: #1B2430; color: #1B2430; }
+.request-error { margin: 0 0 24px; }
+.request-error .reset-link { margin-top: 10px; }
 .quiz-panel h2 { margin: 20px 0 10px; font: 400 27px/1.2 Fraunces, serif; letter-spacing: -.02em; }
 .quiz-progress { display: flex; justify-content: space-between; gap: 15px; color: #5B6F55; font: 11px 'IBM Plex Mono', monospace; letter-spacing: .06em; text-transform: uppercase; }
 .quiz-topic { margin: 0 0 22px; color: #5B6F55; font-size: 13px; line-height: 1.5; }

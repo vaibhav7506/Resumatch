@@ -58,6 +58,18 @@ CREATE TABLE IF NOT EXISTS match_runs (
     had_injection_flag  BOOLEAN NOT NULL DEFAULT false,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+CREATE TABLE IF NOT EXISTS study_materials (
+    document_id TEXT PRIMARY KEY,
+    content TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS quiz_sessions (
+    session_id TEXT PRIMARY KEY,
+    state JSONB NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL DEFAULT now() + interval '24 hours'
+);
 """
 
 

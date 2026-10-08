@@ -164,6 +164,28 @@ enables pgvector and creates missing tables on the Render Postgres instance.
 
 ## API usage
 
+The frontend now includes a **Study test** mode. Upload a study guide or question
+book PDF to run a five-question multiple-choice quiz. Each answer receives an
+explanation; the next question is harder after a correct answer and easier after
+an incorrect answer. Questions sample excerpts across the uploaded material.
+
+- `POST /ingest-study-material`: multipart `file`; returns `document_id`,
+  `material_text`, `extraction_method`, and `pii_redacted`.
+- `POST /quiz/start`: JSON `material_document_id`, optional `question_count`
+  (1–10, default 5); returns `session_id`, `question`, and `target_questions`.
+- `POST /quiz/answer`: JSON `session_id`, `question_id`, `answer` (one of the
+  choices); returns feedback, counts, expected answer, and `next_question`.
+
+Study material and quiz sessions are stored in PostgreSQL. Sessions expire after
+24 hours; submitting the same question again returns the original result.
+Study mode does not call Voyage. Uploads are limited to 20 MB and 500,000
+extracted characters; use a chapter for larger books. Scanned PDFs use the
+existing OCR fallback. Groq defaults to `openai/gpt-oss-20b` on Render.
+
+Run `python -m unittest discover -s tests -v` for the quiz regression tests.
+Run `python scripts/smoke_study.py --base-url https://resumatch-api-e0yu.onrender.com`
+to test PDF ingestion and a complete quiz against the deployed API.
+
 ```bash
 curl -X POST "http://localhost:8000/analyze/stream" \
   -F "resume=@resume.pdf" \
