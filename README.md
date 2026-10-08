@@ -181,6 +181,9 @@ Study material and quiz sessions are stored in PostgreSQL. Sessions expire after
 Study mode does not call Voyage. Uploads are limited to 20 MB and 500,000
 extracted characters; use a chapter for larger books. Scanned PDFs use the
 existing OCR fallback. Groq defaults to `openai/gpt-oss-20b` on Render.
+The study tutor uses `QUIZ_MODEL=openai/gpt-oss-120b`; each generated question
+receives an independent solution check before it is shown. This reduces invalid
+or ambiguous questions, but generated assessments still need human judgment.
 
 Run `python -m unittest discover -s tests -v` for the quiz regression tests.
 Run `python scripts/smoke_study.py --base-url https://resumatch-api-e0yu.onrender.com`

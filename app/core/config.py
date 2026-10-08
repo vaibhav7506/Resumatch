@@ -14,6 +14,7 @@ class Settings(BaseSettings):
 
     groq_api_key: str
     llm_model: str = "openai/gpt-oss-20b"
+    quiz_model: str = "openai/gpt-oss-120b"
 
     voyage_api_key: str
     embedding_model: str = "voyage-3"

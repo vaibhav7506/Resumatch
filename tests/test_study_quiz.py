@@ -60,6 +60,9 @@ class StudyQuizTests(unittest.TestCase):
         }))
         self.llm = self.llm_patch.start()
         self.addCleanup(self.llm_patch.stop)
+        self.validator_patch = patch.object(routes, "_validate_quiz_question")
+        self.validator = self.validator_patch.start()
+        self.addCleanup(self.validator_patch.stop)
 
     def start(self, count=2):
         response = self.client.post("/quiz/start", json={"material_document_id": "material", "question_count": count})
@@ -121,6 +124,11 @@ class StudyQuizTests(unittest.TestCase):
         response = self.client.post("/quiz/answer", json=self.answer_body(started))
         self.assertEqual(response.status_code, 200)
         self.assertNotEqual(response.json()["next_question"]["question"], started["question"]["question"])
+
+    def test_question_with_incorrect_answer_is_regenerated(self):
+        self.validator.side_effect = [ValueError("No correct choice"), None]
+        self.start()
+        self.assertEqual(self.validator.call_count, 2)
 
 
 if __name__ == "__main__":
